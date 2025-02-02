@@ -14,6 +14,8 @@ class Slider {
     }
 
     constructor(direction = 'horizontal') {
+        this.slideSize = 200;
+
         this.direction = direction;
         this.slides = [];
         this.currentIndex = 0;
@@ -84,12 +86,12 @@ class Slider {
     }
 
     updateSliderPosition() {
-        const offset = -this.currentIndex * 200 + 'px';
-
+        if (this.slides.length === 0) return;
+        const offset = -this.currentIndex * this.slideSize + 'px';
         if (this.direction === 'horizontal') {
-            this.sliderWrapper.style.transform = `translateX(${offset})`;
+          this.sliderWrapper.style.transform = `translateX(${offset})`;
         } else {
-            this.sliderWrapper.style.transform = `translateY(${offset})`;
+          this.sliderWrapper.style.transform = `translateY(${offset})`;
         }
     }
 
