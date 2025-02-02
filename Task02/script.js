@@ -74,11 +74,13 @@ class Slider {
     }
 
     nextSlide() {
+        if (this.slides.length === 0) return;
         this.currentIndex = (this.currentIndex + 1) % this.slides.length;
         this.updateSliderPosition();
-    }
-
+      }
+    
     prevSlide() {
+        if (this.slides.length === 0) return;
         this.currentIndex = (this.currentIndex - 1 + this.slides.length) % this.slides.length;
         this.updateSliderPosition();
     }
