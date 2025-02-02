@@ -1,46 +1,47 @@
 class Slider {
+    createElement(tag, options = {}) {
+        const el = document.createElement(tag);
+        if (options.classes) {
+          options.classes.forEach(cls => el.classList.add(cls));
+        }
+        if (options.styles) {
+          Object.assign(el.style, options.styles);
+        }
+        if (options.id) {
+          el.id = options.id;
+        }
+        return el;
+    }
+
     constructor(direction = 'horizontal') {
+        this.slideSize = 200;
+
         this.direction = direction;
         this.slides = [];
         this.currentIndex = 0;
 
-        this.block = document.createElement("div");
-        this.block.classList.add("block");
+        this.block = this.createElement("div", { classes: ["block"] });
+        
+        this.slider = this.createElement("div", { classes: ["slider", this.direction === 'vertical' ? "vertical" : "horizontal"] });
+        
+        this.container = this.createElement("div", { classes: ["container"] });
+        
+        this.sliderWrapper = this.createElement("div", { classes: ["wrapper", this.direction === 'vertical' ? "vertical" : "horizontal"] });
+        
+        this.panel = this.createElement("div", { classes: [this.direction === 'horizontal' ? 'horizontalPanel' : 'verticalPanel'] });
 
-        this.slider = document.createElement("div");
-        this.slider.classList.add("slider");
-        if (this.direction === 'vertical') {
-            this.slider.style.flexDirection = 'row';
-        }
-        this.container = document.createElement("div");
-        this.container.classList.add("container");
-        this.sliderWrapper = document.createElement("div");
-        this.sliderWrapper.classList.add("wrapper");
-        if (this.direction === 'vertical') {
-            this.sliderWrapper.style.flexDirection = 'column';
-        }
-
-        this.panel = document.createElement("div");
-        if (this.direction === 'horizontal') {
-            this.panel.classList.add('horizontalPanel');
-        }
-        else {
-            this.panel.classList.add('verticalPanel');
-        }
-
-        this.prevButton = document.createElement("button");
-        this.prevButton.classList.add("prevBtn");
+        this.prevButton = this.createElement("button", { classes: ["prevBtn"] });
         this.prevButton.textContent = "Prev";
 
-        this.fileInput = document.createElement('input');
+        const uniqueId = 'fileInput_' + Math.random().toString(36).substr(2, 9);
+        this.fileInput = this.createElement("input", { id: uniqueId });
         this.fileInput.type = 'file';
         this.fileInput.id = 'fileInput';
         this.fileInput.accept = 'image/*';
         this.fileInput.multiple = true;
         this.fileInput.addEventListener('change', (event) => this.uploadImages(event.target.files));
 
-        this.nextButton = document.createElement("button");
-        this.nextButton.classList.add("nextBtn");
+        this.nextButton = this.createElement("button", { classes: ["nextBtn"] });
         this.nextButton.textContent = "Next";
 
         this.prevButton.addEventListener("click", (event) => { this.prevSlide() });
@@ -85,12 +86,12 @@ class Slider {
     }
 
     updateSliderPosition() {
-        const offset = -this.currentIndex * 200 + 'px';
-
+        if (this.slides.length === 0) return;
+        const offset = -this.currentIndex * this.slideSize + 'px';
         if (this.direction === 'horizontal') {
-            this.sliderWrapper.style.transform = `translateX(${offset})`;
+          this.sliderWrapper.style.transform = `translateX(${offset})`;
         } else {
-            this.sliderWrapper.style.transform = `translateY(${offset})`;
+          this.sliderWrapper.style.transform = `translateY(${offset})`;
         }
     }
 
