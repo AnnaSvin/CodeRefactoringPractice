@@ -14,15 +14,18 @@ class FormValidator {
 
         this.inputs.forEach((input) => {
             if (input.required && !input.value) {
-                isValid = false;
-                alert(`${input.name} is required!`);
+                isValid = this.handleValidationError(input.name, `${input.name} is required!`, isValid);
             } else if (input.validationType === INPUT_TYPES.EMAIL && !this.isValidEmail(input.value)) {
-                isValid = false;
-                alert(`${input.name} must be a valid email address!`);
+                isValid = this.handleValidationError(input.name, `${input.name} must be a valid email address!`, isValid);
             }
         });
 
         return isValid;
+    }
+
+    handleValidationError(name, message, isValid) {
+        alert(message);
+        return false;
     }
 
     isValidEmail(email) {
@@ -60,6 +63,11 @@ class FormInputManager {
     }
 
     addInput(name, placeholder = "", type = INPUT_TYPES.TEXT, required = false, validationType = null) {
+        const input = this.createInput(name, placeholder, type, required, validationType);
+        this.inputs.push(input);
+    }
+
+    createInput(name, placeholder, type, required, validationType) {
         const label = document.createElement("label");
         label.textContent = name;
 
@@ -70,10 +78,9 @@ class FormInputManager {
         input.required = required;
         input.validationType = validationType;
 
-        this.inputs.push(input);
-
         this.form.appendChild(label);
         this.form.appendChild(input);
+        return input;
     }
 
     getInputs() {
