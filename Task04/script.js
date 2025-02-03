@@ -63,6 +63,11 @@ class FormInputManager {
     }
 
     addInput(name, placeholder = "", type = INPUT_TYPES.TEXT, required = false, validationType = null) {
+        const input = this.createInput(name, placeholder, type, required, validationType);
+        this.inputs.push(input);
+    }
+
+    createInput(name, placeholder, type, required, validationType) {
         const label = document.createElement("label");
         label.textContent = name;
 
@@ -73,10 +78,9 @@ class FormInputManager {
         input.required = required;
         input.validationType = validationType;
 
-        this.inputs.push(input);
-
         this.form.appendChild(label);
         this.form.appendChild(input);
+        return input;
     }
 
     getInputs() {
