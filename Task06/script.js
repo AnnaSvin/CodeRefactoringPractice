@@ -25,7 +25,7 @@ class Notification {
     addCloseButton(notification) {
         const closeButton = document.createElement("button");
         closeButton.classList.add("close-btn");
-        closeButton.textContent = "×"; // Avoiding innerHTML
+        closeButton.textContent = "×";
         closeButton.setAttribute("aria-label", "Close notification");
         closeButton.addEventListener("click", () => this.closeNotification(notification));
         notification.appendChild(closeButton);
