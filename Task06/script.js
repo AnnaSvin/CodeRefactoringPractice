@@ -1,13 +1,18 @@
 class Notification {
     constructor(containerId) {
         this.container = document.getElementById(containerId);
+        if (!this.container) {
+            throw new Error(`Container with ID "${containerId}" not found.`);
+        }
     }
 
-    createNotification(message, type = "success") {
+    createNotification(message, type = "success", duration = 3000) {
+        if (!message) return;
+
         const notification = this.buildNotification(message, type);
         this.addCloseButton(notification);
         this.container.appendChild(notification);
-        this.setAutoClose(notification);
+        this.setAutoClose(notification, duration);
     }
 
     buildNotification(message, type) {
@@ -20,26 +25,34 @@ class Notification {
     addCloseButton(notification) {
         const closeButton = document.createElement("button");
         closeButton.classList.add("close-btn");
-        closeButton.innerHTML = "&times;";
+        closeButton.textContent = "×"; // Avoiding innerHTML
+        closeButton.setAttribute("aria-label", "Close notification");
         closeButton.addEventListener("click", () => this.closeNotification(notification));
         notification.appendChild(closeButton);
     }
 
-    setAutoClose(notification) {
-        setTimeout(() => this.closeNotification(notification), 3000);
+    setAutoClose(notification, duration) {
+        setTimeout(() => this.closeNotification(notification), duration);
     }
 
     closeNotification(notification) {
         notification.classList.add("hide");
-        setTimeout(() => {
-            notification.remove();
-        }, 500);
+        const animationDuration = parseFloat(getComputedStyle(notification).transitionDuration) * 1000 || 500;
+        setTimeout(() => notification.remove(), animationDuration);
     }
 }
 
+
 const notifications = new Notification("notification-container");
 
-document.getElementById("success-btn").onclick = () => notifications.createNotification("Операція успішна!", "success");
-document.getElementById("error-btn").onclick = () => notifications.createNotification("Сталася помилка!", "error");
-document.getElementById("info-btn").onclick = () => notifications.createNotification("Це інформаційне повідомлення.", "info");
-document.getElementById("warning-btn").onclick = () => notifications.createNotification("Це попередження!", "warning");
+document.getElementById("success-btn")?.addEventListener("click", () =>
+    notifications.createNotification("Операція успішна!", "success", 3000));
+
+document.getElementById("error-btn")?.addEventListener("click", () =>
+    notifications.createNotification("Сталася помилка!", "error", 4000));
+
+document.getElementById("info-btn")?.addEventListener("click", () =>
+    notifications.createNotification("Це інформаційне повідомлення.", "info", 5000));
+
+document.getElementById("warning-btn")?.addEventListener("click", () =>
+    notifications.createNotification("Це попередження!", "warning", 3500));
