@@ -3,6 +3,7 @@ class Modal {
         this.modal = document.createElement("div");
         this.modal.classList.add("modalWindow");
         this.modal.style.display = "none";
+        this.modal.style.position = "absolute";
 
         this.header = document.createElement("div");
         this.header.classList.add("modalHeader");
@@ -19,67 +20,69 @@ class Modal {
         this.modal.appendChild(this.content);
         document.body.appendChild(this.modal);
 
-        this.closeButton.addEventListener("click", (event) => {
-            this.Close();
-        });
-        this.header.addEventListener("mousedown", (event) => {
-            this.Move(event);
-        })
+        this.closeButton.addEventListener("click", () => this.close());
+        this.header.addEventListener("mousedown", (event) => this.startDragging(event));
 
-        this.isMoving = false;
-        this.posX = 0;
-        this.posY = 0;
+        this.isDragging = false;
+        this.offsetX = 0;
+        this.offsetY = 0;
+
+        this.onDragging = this.onDragging.bind(this);
+        this.stopDragging = this.stopDragging.bind(this);
     }
 
-    Open(content) {
-        this.SetContent(content);
+    open(content) {
+        this.setContent(content);
         this.modal.style.display = "block";
     }
 
-    Close() {
+    close() {
         this.modal.style.display = "none";
     }
 
-    SetContent(content) {
-        this.content.innerHTML = "";
+    setContent(content) {
+        this.content.textContent = "";
         if (typeof content === "string") {
-            this.content.innerHTML = content;
-        }
-        else {
+            this.content.textContent = content;
+        } else if (content instanceof Node) {
             this.content.appendChild(content);
         }
     }
 
-    Move(event) {
-        this.isMoving = true;
-        this.posX = event.clientX - this.modal.getBoundingClientRect().left;
-        this.posY = event.clientY - this.modal.getBoundingClientRect().top;
-        document.addEventListener("mousemove", (event) => this.Moving(event))
-        document.addEventListener("mouseup", (event) => this.StopMoving(event))
+    startDragging(event) {
+        this.isDragging = true;
+        this.offsetX = event.clientX - this.modal.getBoundingClientRect().left;
+        this.offsetY = event.clientY - this.modal.getBoundingClientRect().top;
+        document.addEventListener("mousemove", this.onDragging);
+        document.addEventListener("mouseup", this.stopDragging);
     }
 
-    Moving(event) {
-        if (this.isMoving) {
-            let x = event.clientX - this.posX;
-            let y = event.clientY - this.posY;
+    onDragging(event) {
+        if (this.isDragging) {
+            let x = event.clientX - this.offsetX;
+            let y = event.clientY - this.offsetY;
             this.modal.style.left = `${x}px`;
             this.modal.style.top = `${y}px`;
         }
     }
 
-    StopMoving() {
-        this.isMoving = false;
-        document.removeEventListener("mousemove", this.Moving);
+    stopDragging() {
+        this.isDragging = false;
+        document.removeEventListener("mousemove", this.onDragging);
+        document.removeEventListener("mouseup", this.stopDragging);
     }
 }
 
-let modal = new Modal();
-let openButton = document.body.querySelector(".open");
-openButton.addEventListener("click", (event) => {
-    modal.Open(`Text В JavaScript є закінчена пропозиція, майже у стандарті, що забезпечує підтримку приватних властивостей та методів на рівні мови. 
-    Приватні властивості і методи повинні починатися з #. Вони доступні лише з класу. 
-    Наприклад, ось приватна властивість #waterLimit та приватний метод, що перевіряє кількість води #fixWaterAmount:
-    В JavaScript є закінчена пропозиція, майже у стандарті, що забезпечує підтримку приватних властивостей та методів на рівні мови. 
-    Приватні властивості і методи повинні починатися з #. Вони доступні лише з класу. 
-    Наприклад, ось приватна властивість #waterLimit та приватний метод, що перевіряє кількість води #fixWaterAmount:`);
-});
+const modal = new Modal();
+const openButton = document.querySelector(".open");
+
+if (openButton) {
+    openButton.addEventListener("click", () => {
+        modal.open("Text В JavaScript є закінчена пропозиція, майже у стандарті, що забезпечує підтримку приватних властивостей та методів на рівні мови. \n" +
+            "Приватні властивості і методи повинні починатися з #. Вони доступні лише з класу. \n" +
+            "Наприклад, ось приватна властивість #waterLimit та приватний метод, що перевіряє кількість води #fixWaterAmount:\n" +
+            "В JavaScript є закінчена пропозиція, майже у стандарті, що забезпечує підтримку приватних властивостей та методів на рівні мови. \n" +
+            "Приватні властивості і методи повинні починатися з #. Вони доступні лише з класу. \n" +
+            "Наприклад, ось приватна властивість #waterLimit та приватний метод, що перевіряє кількість води #fixWaterAmount:");
+    });
+}

@@ -1,30 +1,44 @@
 class Tab {
     constructor(containerId) {
-        this.container = document.createElement("div");
-        this.container.classList.add("container");
+        this.container = document.getElementById(containerId);
+        if (!this.container) {
+            throw new Error(`Container with ID "${containerId}" not found.`);
+        }
+
         this.tabsPanel = document.createElement("div");
         this.tabsPanel.classList.add("tabs-panel");
+
+        this.contentWrapper = document.createElement("div");
+        this.contentWrapper.classList.add("tabs-content-wrapper");
+
         this.tabButtons = [];
         this.tabContents = [];
         this.activeIndex = 0;
+
         this.container.appendChild(this.tabsPanel);
-        document.body.appendChild(this.container);
+        this.container.appendChild(this.contentWrapper);
     }
 
     addTab(title, content) {
         const tabIndex = this.tabButtons.length;
 
-        const button = document.createElement("div");
+        const button = document.createElement("button");
         button.classList.add("tab-button");
-        button.innerText = title;
-        button.addEventListener("click", (event) => { this.switchTab(tabIndex) });
+        button.textContent = title;
+        button.dataset.index = tabIndex;
         this.tabsPanel.appendChild(button);
         this.tabButtons.push(button);
 
         const contentDiv = document.createElement("div");
         contentDiv.classList.add("tab-content");
-        contentDiv.innerHTML = content;
-        this.container.appendChild(contentDiv);
+
+        if (typeof content === "string") {
+            contentDiv.textContent = content;
+        } else if (content instanceof Node) {
+            contentDiv.appendChild(content);
+        }
+
+        this.contentWrapper.appendChild(contentDiv);
         this.tabContents.push(contentDiv);
 
         if (tabIndex === 0) {
@@ -34,6 +48,8 @@ class Tab {
     }
 
     switchTab(index) {
+        if (index < 0 || index >= this.tabButtons.length) return;
+
         this.tabButtons[this.activeIndex].classList.remove("active");
         this.tabContents[this.activeIndex].classList.remove("active");
 
@@ -42,10 +58,19 @@ class Tab {
 
         this.activeIndex = index;
     }
+
+    init() {
+        this.tabsPanel.addEventListener("click", (event) => {
+            if (event.target.classList.contains("tab-button")) {
+                const index = parseInt(event.target.dataset.index);
+                this.switchTab(index);
+            }
+        });
+    }
 }
 
-const tabs = new Tab("tabs");
-tabs.addTab("Tab 1", "<p>Вміст першої вкладки.</p>");
-tabs.addTab("Tab 2", "<p>Вміст другої вкладки.</p>");
-tabs.addTab("Tab 3", "<p>Вміст третьої вкладки.</p>");
-
+const tabs = new Tab("tabs-container");
+tabs.addTab("Tab 1", "Вміст першої вкладки.");
+tabs.addTab("Tab 2", "Вміст другої вкладки.");
+tabs.addTab("Tab 3", "Вміст третьої вкладки.");
+tabs.init();
