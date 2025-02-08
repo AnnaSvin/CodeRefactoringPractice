@@ -1,72 +1,108 @@
 class Slider {
-    constructor(direction = 'horizontal') {
+    static DIRECTION = {
+        HORIZONTAL: "horizontal",
+        VERTICAL: "vertical"
+    };
+
+    static CLASS_NAMES = {
+        BLOCK: "block",
+        SLIDER: "slider",
+        CONTAINER: "container",
+        WRAPPER: "wrapper",
+        HORIZONTAL_PANEL: "horizontalPanel",
+        VERTICAL_PANEL: "verticalPanel",
+        PREV_BUTTON: "prevBtn",
+        NEXT_BUTTON: "nextBtn",
+        SLIDE: "slide"
+    };
+
+    static BUTTON_TEXT = {
+        PREV: "Prev",
+        NEXT: "Next"
+    };
+
+    static FILE_INPUT = {
+        ID: "fileInput",
+        ACCEPT: "image/*"
+    };
+
+    static SLIDE_WIDTH = 200;
+
+    constructor(direction = Slider.DIRECTION.HORIZONTAL) {
         this.direction = direction;
         this.slides = [];
         this.currentIndex = 0;
 
         this.block = document.createElement("div");
-        this.block.classList.add("block");
+        this.block.classList.add(Slider.CLASS_NAMES.BLOCK);
 
         this.slider = document.createElement("div");
-        this.slider.classList.add("slider");
-        if (this.direction === 'vertical') {
-            this.slider.style.flexDirection = 'row';
+        this.slider.classList.add(Slider.CLASS_NAMES.SLIDER);
+        if (this.direction === Slider.DIRECTION.VERTICAL) {
+            this.slider.style.flexDirection = "row";
         }
+
         this.container = document.createElement("div");
-        this.container.classList.add("container");
+        this.container.classList.add(Slider.CLASS_NAMES.CONTAINER);
+
         this.sliderWrapper = document.createElement("div");
-        this.sliderWrapper.classList.add("wrapper");
-        if (this.direction === 'vertical') {
-            this.sliderWrapper.style.flexDirection = 'column';
+        this.sliderWrapper.classList.add(Slider.CLASS_NAMES.WRAPPER);
+        if (this.direction === Slider.DIRECTION.VERTICAL) {
+            this.sliderWrapper.style.flexDirection = "column";
         }
 
         this.panel = document.createElement("div");
-        if (this.direction === 'horizontal') {
-            this.panel.classList.add('horizontalPanel');
-        }
-        else {
-            this.panel.classList.add('verticalPanel');
-        }
+        this.panel.classList.add(
+            this.direction === Slider.DIRECTION.HORIZONTAL
+                ? Slider.CLASS_NAMES.HORIZONTAL_PANEL
+                : Slider.CLASS_NAMES.VERTICAL_PANEL
+        );
 
-        this.prevButton = document.createElement("button");
-        this.prevButton.classList.add("prevBtn");
-        this.prevButton.textContent = "Prev";
+        this.prevButton = this.createButton(
+            Slider.BUTTON_TEXT.PREV,
+            Slider.CLASS_NAMES.PREV_BUTTON,
+            () => this.prevSlide()
+        );
+        this.nextButton = this.createButton(
+            Slider.BUTTON_TEXT.NEXT,
+            Slider.CLASS_NAMES.NEXT_BUTTON,
+            () => this.nextSlide()
+        );
 
-        this.fileInput = document.createElement('input');
-        this.fileInput.type = 'file';
-        this.fileInput.id = 'fileInput';
-        this.fileInput.accept = 'image/*';
-        this.fileInput.multiple = true;
-        this.fileInput.addEventListener('change', (event) => this.uploadImages(event.target.files));
-
-        this.nextButton = document.createElement("button");
-        this.nextButton.classList.add("nextBtn");
-        this.nextButton.textContent = "Next";
-
-        this.prevButton.addEventListener("click", (event) => { this.prevSlide() });
-        this.nextButton.addEventListener("click", (event) => { this.nextSlide() });
+        this.fileInput = this.createFileInput();
 
         this.container.appendChild(this.sliderWrapper);
-        this.panel.appendChild(this.prevButton);
-        this.panel.appendChild(this.nextButton);
-
-        this.slider.appendChild(this.container);
-        this.slider.appendChild(this.panel);
-        this.block.appendChild(this.fileInput);
-        this.block.appendChild(this.slider);
+        this.panel.append(this.prevButton, this.nextButton);
+        this.slider.append(this.container, this.panel);
+        this.block.append(this.fileInput, this.slider);
         document.body.appendChild(this.block);
     }
 
+    createButton(text, className, callback) {
+        const button = document.createElement("button");
+        button.classList.add(className);
+        button.textContent = text;
+        button.addEventListener("click", callback);
+        return button;
+    }
+
+    createFileInput() {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.id = Slider.FILE_INPUT.ID;
+        input.accept = Slider.FILE_INPUT.ACCEPT;
+        input.multiple = true;
+        input.addEventListener("change", (event) => this.uploadImages(event.target.files));
+        return input;
+    }
+
     addSlide(content) {
-        const slide = document.createElement('div');
+        const slide = document.createElement("div");
+        slide.classList.add(Slider.CLASS_NAMES.SLIDE);
 
-        slide.classList.add('slide');
-
-        // Додає зображення або інший вміст
-        if (typeof content === 'string') {
+        if (typeof content === "string") {
             slide.innerHTML = content;
-        }
-        else {
+        } else {
             slide.appendChild(content);
         }
 
@@ -85,23 +121,21 @@ class Slider {
     }
 
     updateSliderPosition() {
-        const offset = -this.currentIndex * 200 + 'px';
-
-        if (this.direction === 'horizontal') {
-            this.sliderWrapper.style.transform = `translateX(${offset})`;
-        } else {
-            this.sliderWrapper.style.transform = `translateY(${offset})`;
-        }
+        const offset = -this.currentIndex * Slider.SLIDE_WIDTH + "px";
+        this.sliderWrapper.style.transform =
+            this.direction === Slider.DIRECTION.HORIZONTAL
+                ? `translateX(${offset})`
+                : `translateY(${offset})`;
     }
 
-    uploadImages = (files) => {
+    uploadImages(files) {
         Array.from(files).forEach(file => {
             const reader = new FileReader();
             reader.onload = (e) => {
-                const img = document.createElement('img');
+                const img = document.createElement("img");
                 img.src = e.target.result;
-                img.alt = 'Uploaded Image';
-                img.style.width = '100%';
+                img.alt = "Uploaded Image";
+                img.style.width = "100%";
                 this.addSlide(img);
             };
             reader.readAsDataURL(file);
@@ -109,15 +143,17 @@ class Slider {
     }
 }
 
-const slider_one = new Slider('horizontal');
-const slider_two = new Slider('vertical');
+const IMAGE_PATHS = [
+    "images/Mountain1.jpg",
+    "images/Mountain2.jpeg",
+    "images/Mountain3.jpeg",
+    "images/Mountain4.jpeg"
+];
 
-slider_one.addSlide('<img src="images/Mountain1.jpg" alt="Image 1">');
-slider_one.addSlide('<img src="images/Mountain2.jpeg" alt="Image 2">');
-slider_one.addSlide('<img src="images/Mountain3.jpeg" alt="Image 3">');
-slider_one.addSlide('<img src="images/Mountain4.jpeg" alt="Image 4">');
+const slider_one = new Slider(Slider.DIRECTION.HORIZONTAL);
+const slider_two = new Slider(Slider.DIRECTION.VERTICAL);
 
-slider_two.addSlide('<img src="images/Mountain1.jpg" alt="Image 1">');
-slider_two.addSlide('<img src="images/Mountain2.jpeg" alt="Image 2">');
-slider_two.addSlide('<img src="images/Mountain3.jpeg" alt="Image 3">');
-slider_two.addSlide('<img src="images/Mountain4.jpeg" alt="Image 4">');
+IMAGE_PATHS.forEach(imgSrc => {
+    slider_one.addSlide(`<img src="${imgSrc}" alt="Image">`);
+    slider_two.addSlide(`<img src="${imgSrc}" alt="Image">`);
+});
