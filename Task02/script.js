@@ -1,32 +1,73 @@
 class Slider {
-    constructor(direction = 'horizontal') {
+    static DIRECTION = {
+        HORIZONTAL: "horizontal",
+        VERTICAL: "vertical"
+    };
+
+    static CLASS_NAMES = {
+        BLOCK: "block",
+        SLIDER: "slider",
+        CONTAINER: "container",
+        WRAPPER: "wrapper",
+        HORIZONTAL_PANEL: "horizontalPanel",
+        VERTICAL_PANEL: "verticalPanel",
+        PREV_BUTTON: "prevBtn",
+        NEXT_BUTTON: "nextBtn",
+        SLIDE: "slide"
+    };
+
+    static BUTTON_TEXT = {
+        PREV: "Prev",
+        NEXT: "Next"
+    };
+
+    static FILE_INPUT = {
+        ID: "fileInput",
+        ACCEPT: "image/*"
+    };
+
+    static SLIDE_WIDTH = 200;
+
+    constructor(direction = Slider.DIRECTION.HORIZONTAL) {
         this.direction = direction;
         this.slides = [];
         this.currentIndex = 0;
 
         this.block = document.createElement("div");
-        this.block.classList.add("block");
+        this.block.classList.add(Slider.CLASS_NAMES.BLOCK);
 
         this.slider = document.createElement("div");
-        this.slider.classList.add("slider");
-        if (this.direction === 'vertical') {
-            this.slider.style.flexDirection = 'row';
+        this.slider.classList.add(Slider.CLASS_NAMES.SLIDER);
+        if (this.direction === Slider.DIRECTION.VERTICAL) {
+            this.slider.style.flexDirection = "row";
         }
 
         this.container = document.createElement("div");
-        this.container.classList.add("container");
+        this.container.classList.add(Slider.CLASS_NAMES.CONTAINER);
 
         this.sliderWrapper = document.createElement("div");
-        this.sliderWrapper.classList.add("wrapper");
-        if (this.direction === 'vertical') {
-            this.sliderWrapper.style.flexDirection = 'column';
+        this.sliderWrapper.classList.add(Slider.CLASS_NAMES.WRAPPER);
+        if (this.direction === Slider.DIRECTION.VERTICAL) {
+            this.sliderWrapper.style.flexDirection = "column";
         }
 
         this.panel = document.createElement("div");
-        this.panel.classList.add(this.direction === 'horizontal' ? 'horizontalPanel' : 'verticalPanel');
+        this.panel.classList.add(
+            this.direction === Slider.DIRECTION.HORIZONTAL
+                ? Slider.CLASS_NAMES.HORIZONTAL_PANEL
+                : Slider.CLASS_NAMES.VERTICAL_PANEL
+        );
 
-        this.prevButton = this.createButton("Prev", "prevBtn", () => this.prevSlide());
-        this.nextButton = this.createButton("Next", "nextBtn", () => this.nextSlide());
+        this.prevButton = this.createButton(
+            Slider.BUTTON_TEXT.PREV,
+            Slider.CLASS_NAMES.PREV_BUTTON,
+            () => this.prevSlide()
+        );
+        this.nextButton = this.createButton(
+            Slider.BUTTON_TEXT.NEXT,
+            Slider.CLASS_NAMES.NEXT_BUTTON,
+            () => this.nextSlide()
+        );
 
         this.fileInput = this.createFileInput();
 
@@ -48,8 +89,8 @@ class Slider {
     createFileInput() {
         const input = document.createElement("input");
         input.type = "file";
-        input.id = "fileInput";
-        input.accept = "image/*";
+        input.id = Slider.FILE_INPUT.ID;
+        input.accept = Slider.FILE_INPUT.ACCEPT;
         input.multiple = true;
         input.addEventListener("change", (event) => this.uploadImages(event.target.files));
         return input;
@@ -57,7 +98,7 @@ class Slider {
 
     addSlide(content) {
         const slide = document.createElement("div");
-        slide.classList.add("slide");
+        slide.classList.add(Slider.CLASS_NAMES.SLIDE);
 
         if (typeof content === "string") {
             slide.innerHTML = content;
@@ -80,10 +121,11 @@ class Slider {
     }
 
     updateSliderPosition() {
-        const offset = -this.currentIndex * 200 + "px";
-        this.sliderWrapper.style.transform = this.direction === "horizontal" ?
-            `translateX(${offset})` :
-            `translateY(${offset})`;
+        const offset = -this.currentIndex * Slider.SLIDE_WIDTH + "px";
+        this.sliderWrapper.style.transform =
+            this.direction === Slider.DIRECTION.HORIZONTAL
+                ? `translateX(${offset})`
+                : `translateY(${offset})`;
     }
 
     uploadImages(files) {
@@ -108,8 +150,8 @@ const IMAGE_PATHS = [
     "images/Mountain4.jpeg"
 ];
 
-const slider_one = new Slider("horizontal");
-const slider_two = new Slider("vertical");
+const slider_one = new Slider(Slider.DIRECTION.HORIZONTAL);
+const slider_two = new Slider(Slider.DIRECTION.VERTICAL);
 
 IMAGE_PATHS.forEach(imgSrc => {
     slider_one.addSlide(`<img src="${imgSrc}" alt="Image">`);
