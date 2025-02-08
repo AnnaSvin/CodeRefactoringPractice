@@ -33,26 +33,26 @@ class Slider {
         this.slides = [];
         this.currentIndex = 0;
 
-        this.block = document.createElement("div");
-        this.block.classList.add(Slider.CLASS_NAMES.BLOCK);
+        this.createBaseStructure();
+        this.createControls();
+        this.appendToDOM();
+    }
 
-        this.slider = document.createElement("div");
-        this.slider.classList.add(Slider.CLASS_NAMES.SLIDER);
+    createBaseStructure() {
+        this.block = this.createElement("div", Slider.CLASS_NAMES.BLOCK);
+        this.slider = this.createElement("div", Slider.CLASS_NAMES.SLIDER);
+        this.container = this.createElement("div", Slider.CLASS_NAMES.CONTAINER);
+        this.sliderWrapper = this.createElement("div", Slider.CLASS_NAMES.WRAPPER);
+
         if (this.direction === Slider.DIRECTION.VERTICAL) {
             this.slider.style.flexDirection = "row";
-        }
-
-        this.container = document.createElement("div");
-        this.container.classList.add(Slider.CLASS_NAMES.CONTAINER);
-
-        this.sliderWrapper = document.createElement("div");
-        this.sliderWrapper.classList.add(Slider.CLASS_NAMES.WRAPPER);
-        if (this.direction === Slider.DIRECTION.VERTICAL) {
             this.sliderWrapper.style.flexDirection = "column";
         }
+    }
 
-        this.panel = document.createElement("div");
-        this.panel.classList.add(
+    createControls() {
+        this.panel = this.createElement(
+            "div",
             this.direction === Slider.DIRECTION.HORIZONTAL
                 ? Slider.CLASS_NAMES.HORIZONTAL_PANEL
                 : Slider.CLASS_NAMES.VERTICAL_PANEL
@@ -70,7 +70,9 @@ class Slider {
         );
 
         this.fileInput = this.createFileInput();
+    }
 
+    appendToDOM() {
         this.container.appendChild(this.sliderWrapper);
         this.panel.append(this.prevButton, this.nextButton);
         this.slider.append(this.container, this.panel);
@@ -78,16 +80,21 @@ class Slider {
         document.body.appendChild(this.block);
     }
 
+    createElement(tag, className) {
+        const element = document.createElement(tag);
+        if (className) element.classList.add(className);
+        return element;
+    }
+
     createButton(text, className, callback) {
-        const button = document.createElement("button");
-        button.classList.add(className);
+        const button = this.createElement("button", className);
         button.textContent = text;
         button.addEventListener("click", callback);
         return button;
     }
 
     createFileInput() {
-        const input = document.createElement("input");
+        const input = this.createElement("input");
         input.type = "file";
         input.id = Slider.FILE_INPUT.ID;
         input.accept = Slider.FILE_INPUT.ACCEPT;
@@ -97,9 +104,7 @@ class Slider {
     }
 
     addSlide(content) {
-        const slide = document.createElement("div");
-        slide.classList.add(Slider.CLASS_NAMES.SLIDE);
-
+        const slide = this.createElement("div", Slider.CLASS_NAMES.SLIDE);
         if (typeof content === "string") {
             slide.innerHTML = content;
         } else {
@@ -131,15 +136,17 @@ class Slider {
     uploadImages(files) {
         Array.from(files).forEach(file => {
             const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = document.createElement("img");
-                img.src = e.target.result;
-                img.alt = "Uploaded Image";
-                img.style.width = "100%";
-                this.addSlide(img);
-            };
+            reader.onload = (e) => this.addSlide(this.createImageElement(e.target.result));
             reader.readAsDataURL(file);
         });
+    }
+
+    createImageElement(src) {
+        const img = this.createElement("img");
+        img.src = src;
+        img.alt = "Uploaded Image";
+        img.style.width = "100%";
+        return img;
     }
 }
 
