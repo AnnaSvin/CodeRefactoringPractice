@@ -1,57 +1,53 @@
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.querySelector('form');
 
-    const storageHandlers = {
-        checkbox: (input) => {
-            const checkboxes = form.querySelectorAll(`input[name="${input.name}"]`);
-            const selectedValues = Array.from(checkboxes)
-                .filter(checkbox => checkbox.checked)
-                .map(checkbox => checkbox.value);
-            return JSON.stringify(selectedValues);
-        },
-        radio: (input) => input.checked ? input.value : null,
-        SELECT: (input) => JSON.stringify(Array.from(input.selectedOptions).map(option => option.value)),
-        default: (input) => input.value
-    };
-
-    form.addEventListener('input', (event) => {
-        const input = event.target;
-        const handler = storageHandlers[input.type] || storageHandlers[input.tagName] || storageHandlers.default;
-        const value = handler(input);
-        if (value !== null) {
-            localStorage.setItem(input.name, value);
-        }
-    });
-
-    const restoreHandlers = {
-        checkbox: (input, savedValue) => {
-            const selectedValues = JSON.parse(savedValue);
-            input.checked = selectedValues.includes(input.value);
-        },
-        radio: (input, savedValue) => {
-            if (savedValue === input.value) {
-                input.checked = true;
-            }
-        },
-        SELECT: (input, savedValue) => {
-            const selectedValues = JSON.parse(savedValue);
-            Array.from(input.options).forEach(option => {
-                option.selected = selectedValues.includes(option.value);
-            });
-        },
-        default: (input, savedValue) => {
-            input.value = savedValue;
-        }
-    };
-
-    Array.from(form.elements).forEach(input => {
+    // Загальна функція для збереження і відновлення значень
+    function handleInputValue(input, action) {
         const savedValue = localStorage.getItem(input.name);
-        if (savedValue !== null) {
-            const handler = restoreHandlers[input.type] || restoreHandlers[input.tagName] || restoreHandlers.default;
-            handler(input, savedValue);
+
+        // Збереження значення
+        if (action === 'save') {
+            let value;
+            if (input.type === 'checkbox' || input.type === 'radio') {
+                value = input.checked ? input.value : null;
+            } else if (input.tagName === 'SELECT') {
+                value = JSON.stringify(Array.from(input.selectedOptions).map(option => option.value));
+            } else {
+                value = input.value;
+            }
+            if (value !== null) {
+                localStorage.setItem(input.name, value);
+            }
         }
+
+        // Відновлення значення
+        if (action === 'restore' && savedValue !== null) {
+            if (input.type === 'checkbox') {
+                input.checked = savedValue === 'true';
+            } else if (input.type === 'radio') {
+                input.checked = input.value === savedValue;
+            } else if (input.tagName === 'SELECT') {
+                const selectedValues = JSON.parse(savedValue);
+                Array.from(input.options).forEach(option => {
+                    option.selected = selectedValues.includes(option.value);
+                });
+            } else {
+                input.value = savedValue;
+            }
+        }
+    }
+
+    // Подія для збереження значень
+    form.addEventListener('input', (event) => {
+        handleInputValue(event.target, 'save');
     });
 
+    // Відновлення значень після завантаження
+    Array.from(form.elements).forEach(input => {
+        handleInputValue(input, 'restore');
+    });
+
+    // Очистка localStorage при скиданні форми
     form.addEventListener('reset', () => {
         Array.from(form.elements).forEach(input => localStorage.removeItem(input.name));
     });
