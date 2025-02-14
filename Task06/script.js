@@ -1,4 +1,8 @@
 class Notification {
+    // Константи для часу автозакриття та затримки видалення
+    static AUTO_CLOSE_TIME = 3000;  // час в мс до автозакриття
+    static REMOVE_TIMEOUT = 500;    // час в мс для затримки перед видаленням
+
     constructor(containerId) {
         this.container = document.getElementById(containerId);
     }
@@ -26,14 +30,14 @@ class Notification {
     }
 
     setAutoClose(notification) {
-        setTimeout(() => this.closeNotification(notification), 3000);
+        setTimeout(() => this.closeNotification(notification), Notification.AUTO_CLOSE_TIME);
     }
 
     closeNotification(notification) {
         notification.classList.add("hide");
         setTimeout(() => {
             notification.remove();
-        }, 500);
+        }, Notification.REMOVE_TIMEOUT);
     }
 }
 
