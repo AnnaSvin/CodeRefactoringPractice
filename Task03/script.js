@@ -18,26 +18,25 @@ class Table {
         });
     }
 
+    createRow(data, isHeader = false) {
+        const row = document.createElement("tr");
+        data.forEach(cellData => {
+            const cell = document.createElement(isHeader ? "th" : "td");
+            cell.textContent = cellData;
+            row.appendChild(cell);
+        });
+        return row;
+    }
+
     generateHTML() {
         const table = document.createElement("table");
 
-        const headerRow = document.createElement("tr");
-        this.headers.forEach(header => {
-            const th = document.createElement("th");
-            th.textContent = header;
-            headerRow.appendChild(th);
-        });
-        table.appendChild(headerRow);
+        // Додаємо заголовки
+        table.appendChild(this.createRow(this.headers, true));
 
-        this.rows.forEach(rowData => {
-            const row = document.createElement("tr");
-            rowData.forEach(cellData => {
-                const td = document.createElement("td");
-                td.textContent = cellData;
-                row.appendChild(td);
-            });
-            table.appendChild(row);
-        });
+        // Додаємо рядки з даними
+        this.rows.forEach(rowData => table.appendChild(this.createRow(rowData)));
+
         return table;
     }
 }
