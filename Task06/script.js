@@ -5,7 +5,7 @@ class Notification {
 
     createNotification(message, type = "success") {
         const notification = this.buildNotification(message, type);
-        this.addCloseButton(notification);
+        this.setupNotification(notification);
         this.container.appendChild(notification);
         this.setAutoClose(notification);
     }
@@ -15,6 +15,10 @@ class Notification {
         notification.classList.add("notification", type);
         notification.textContent = message;
         return notification;
+    }
+
+    setupNotification(notification) {
+        this.addCloseButton(notification);
     }
 
     addCloseButton(notification) {
@@ -31,9 +35,7 @@ class Notification {
 
     closeNotification(notification) {
         notification.classList.add("hide");
-        setTimeout(() => {
-            notification.remove();
-        }, 500);
+        setTimeout(() => notification.remove(), 500);
     }
 }
 
